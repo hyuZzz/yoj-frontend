@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-row id="globalHeader" style="margin-bottom: 5px" align="center">
+    <a-row id="globalHeader" align="center" :wrap="false">
       <a-col flex="auto">
         <a-menu
           mode="horizontal"
@@ -53,12 +53,14 @@ console.log(store.state.user.loginUser);
 //     role: "?",
 //   });
 // }, 2000);
+
 const doMenuClick = (key: string) => {
   router.push({
     path: key,
   });
 };
 </script>
+
 <style scoped>
 .title-bar {
   display: flex;
@@ -67,7 +69,7 @@ const doMenuClick = (key: string) => {
 
 .title {
   color: #444;
-  margin-left: 16px;
+  margin-left: 10px;
 }
 
 .logo {
