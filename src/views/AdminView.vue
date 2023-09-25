@@ -1,5 +1,5 @@
 <template>
-  <div class="admin">
+  <div class="home">
     管理员可见
     <img alt="Vue logo" src="../assets/logo.png" />
     <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
@@ -11,7 +11,7 @@ import { defineComponent } from "vue";
 import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
 
 export default defineComponent({
-  name: "adminView",
+  name: "AdminView",
   components: {
     HelloWorld,
   },
