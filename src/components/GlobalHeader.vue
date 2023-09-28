@@ -13,7 +13,7 @@
         >
           <div class="title-bar">
             <img class="logo" src="../assets/oj-logo.svg" />
-            <div class="title">鱼 OJ</div>
+            <div class="title">YU OJ</div>
           </div>
         </a-menu-item>
         <a-menu-item v-for="item in visibleRoutes" :key="item.path">
@@ -66,12 +66,12 @@ router.afterEach((to, from, failure) => {
 
 console.log();
 
-setTimeout(() => {
-  store.dispatch("user/getLoginUser", {
-    userName: "YU管理",
-    userRole: ACCESS_ENUM.ADMIN,
-  });
-}, 2000);
+// setTimeout(() => {
+//   store.dispatch("user/getLoginUser", {
+//     userName: "YU管理",
+//     userRole: ACCESS_ENUM.ADMIN,
+//   });
+// }, 2000);
 
 const doMenuClick = (key: string) => {
   router.push({
