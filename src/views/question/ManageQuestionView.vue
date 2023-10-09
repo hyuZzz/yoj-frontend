@@ -7,13 +7,14 @@
       :pagination="{
         showTotal: true,
         pageSize: searchParams.pageSize,
-        current: searchParams.pageNum,
+        current: searchParams.current,
         total,
       }"
+      @page-change="onPageChange"
     >
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="doUpdate(record)"> 修改</a-button>
+          <a-button type="primary" @click="doUpdate(record)">修改</a-button>
           <a-button status="danger" @click="doDelete(record)">删除</a-button>
         </a-space>
       </template>
@@ -22,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import {
   Page_Question_,
   Question,
@@ -38,9 +39,12 @@ const tableRef = ref();
 const dataList = ref([]);
 const total = ref(0);
 const searchParams = ref({
-  pageSize: 10,
-  pageNum: 1,
+  pageSize: 2,
+  current: 1,
 });
+/**
+ * 监听searchParams变量，改变时触发页面的重新加载
+ */
 
 const loadData = async () => {
   const res = await QuestionControllerService.listQuestionByPageUsingPost(
@@ -53,6 +57,11 @@ const loadData = async () => {
     message.error("加载失败，" + res.message);
   }
 };
+
+watchEffect(() => {
+  //此钩子函数作用为监听下面传递的所有函数的变量，当内容改变重新触发页面重新加载函数
+  loadData();
+});
 
 /**
  * 页面加载时，请求数据
@@ -114,6 +123,12 @@ const columns = [
   },
 ];
 
+const onPageChange = (page: number) => {
+  searchParams.value = {
+    ...searchParams.value, //将searchParams拆解并将page放进去
+    current: page,
+  };
+};
 const doDelete = async (question: Question) => {
   const res = await QuestionControllerService.deleteQuestionUsingPost({
     id: question.id,
