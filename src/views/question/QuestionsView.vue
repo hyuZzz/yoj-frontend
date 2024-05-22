@@ -1,18 +1,28 @@
 <template>
-  <div id="QuestionsView">
-    <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称" style="min-width: 240px">
-        <a-input v-model="searchParams.title" placeholder="请输入名称" />
-      </a-form-item>
-      <a-form-item field="tags" label="标签" style="min-width: 280px">
-        <a-input-tag v-model="searchParams.tags" placeholder="请输入标签" />
+  <div id="questionsView">
+    <a-form :model="searchParams" layout="inline" style="margin-left: 300px">
+      <a-form-item field="title" label="题目：" tooltip="请输入搜索的题目">
+        <a-input v-model="searchParams.title" placeholder="请输入搜索题目" />
       </a-form-item>
 
+      <a-form-item
+        field="tags"
+        label="题目标签："
+        tooltip="请输入搜索题目标签"
+        style="min-width: 280px"
+      >
+        <a-input-tag v-model="searchParams.tags" placeholder="请输入题目标签" />
+      </a-form-item>
       <a-form-item>
-        <a-button type="primary" @click="doSubmit">提交</a-button>
+        <a-button type="outline" shape="round" status="normal" @click="doSubmit"
+          >搜索
+        </a-button>
       </a-form-item>
     </a-form>
+    <a-divider size="0" />
     <a-table
+      column-resizable
+      wrapper
       :ref="tableRef"
       :columns="columns"
       :data="dataList"
@@ -21,31 +31,45 @@
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
+        showJumper: true,
+        showPageSize: true,
       }"
       @page-change="onPageChange"
+      @pageSizeChange="onPageSizeChange"
     >
       <template #tags="{ record }">
         <a-space wrap>
-          <a-tag v-for="(tag, index) of record.tags" :key="index" color="green"
+          <a-tag
+            size="medium"
+            v-for="(tag, index) of record.tags"
+            :key="index"
+            :color="getTagColor(tag)"
             >{{ tag }}
           </a-tag>
         </a-space>
       </template>
-
       <template #acceptedRate="{ record }">
         {{
           `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
+            Math.round(
+              (record.submitNum > 0
+                ? (record.acceptedNum / record.submitNum) * 100
+                : "0" * 100) * 100
+            ) / 100
           }% (${record.acceptedNum}/${record.submitNum})`
         }}
       </template>
       <template #createTime="{ record }">
-        {{ moment(record.createTime).format("YYYY-MM-DD hh:mm") }}
+        {{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
-
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="toQuestionPage(record)">
+          <a-button
+            shape="round"
+            status="normal"
+            type="primary"
+            @click="toQuestionPage(record)"
+          >
             做题
           </a-button>
         </a-space>
@@ -57,33 +81,44 @@
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
 import {
-  Page_Question_,
   Question,
   QuestionControllerService,
   QuestionQueryRequest,
-} from "../../../generated";
+} from "../../../backapi";
 import message from "@arco-design/web-vue/es/message";
-import * as querystring from "querystring";
-import moment from "moment";
 import { useRouter } from "vue-router";
+import moment from "moment";
 
-// const show = ref(true);
 const tableRef = ref();
 
 const dataList = ref([]);
 const total = ref(0);
+
+const getTagColor = (tag: string) => {
+  // 根据标签值返回相应的颜色
+  if (tag === "困难") {
+    return "red";
+  } else if (tag === "中等") {
+    return "orange";
+  } else if (tag === "简单") {
+    return "green";
+  } else return "blue";
+};
+
 const searchParams = ref<QuestionQueryRequest>({
-  pageSize: 5,
+  title: "",
+  tags: [],
+  pageSize: 10,
   current: 1,
 });
-/**
- * 监听searchParams变量，改变时触发页面的重新加载
- */
 
+console.log("小数：", Math.round(5.111111 * 100) / 100);
 const loadData = async () => {
-  const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
-    searchParams.value
-  );
+  const res = await QuestionControllerService.listQuestionVoByPageUsingPost({
+    ...searchParams.value,
+    sortField: "createTime",
+    sortOrder: "descend",
+  });
   if (res.code === 0) {
     dataList.value = res.data.records;
     total.value = res.data.total;
@@ -92,8 +127,10 @@ const loadData = async () => {
   }
 };
 
+/**
+ * 监听 searchParams 变量，改变时触发页面的重新加载
+ */
 watchEffect(() => {
-  //此钩子函数作用为监听下面传递的所有函数的变量，当内容改变重新触发页面重新加载函数
   loadData();
 });
 
@@ -104,64 +141,89 @@ onMounted(() => {
   loadData();
 });
 
-// {id: "1", title: "A+D", content: "newQuestion", tags: "["JAVA"]", answer: "1", submitNum: 0,…}
-
 const columns = [
   {
     title: "题号",
     dataIndex: "id",
+    align: "center",
   },
   {
-    title: "题目名称",
+    title: "题目",
     dataIndex: "title",
+    align: "center",
   },
   {
-    title: "标签",
+    title: "题目标签",
     slotName: "tags",
+    align: "center",
   },
   {
     title: "通过率",
     slotName: "acceptedRate",
+    align: "center",
   },
   {
     title: "创建时间",
     slotName: "createTime",
+    align: "center",
+    sortable: {
+      sortDirections: ["ascend"],
+    },
   },
   {
+    title: "操作",
     slotName: "optional",
+    align: "center",
   },
 ];
-
+/**
+ * 当前分页
+ * @param page
+ */
 const onPageChange = (page: number) => {
   searchParams.value = {
-    ...searchParams.value, //将searchParams拆解并将page放进去
+    ...searchParams.value,
     current: page,
   };
 };
-
+/**
+ * 分页大小
+ * @param size
+ */
+const onPageSizeChange = (size: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    pageSize: size,
+  };
+};
 const router = useRouter();
+
 /**
  * 跳转到做题页面
  * @param question
  */
 const toQuestionPage = (question: Question) => {
   router.push({
-    path: `/view/question/${question.id}`,
+    path: `/question/view/${question.id}`,
   });
 };
+
 /**
  * 确认搜索，重新加载数据
  */
 const doSubmit = () => {
+  // 这里需要重置搜索页号
   searchParams.value = {
     ...searchParams.value,
     current: 1,
   };
-  // loadData();
 };
 </script>
 
 <style scoped>
-#QuestionsView {
+#questionsView {
+  max-width: 1280px;
+  margin: 0 auto;
+  border-radius: 10px;
 }
 </style>

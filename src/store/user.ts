@@ -1,7 +1,11 @@
+/**
+ * @author YUUU
+ * @createTime 2023/8/21 星期一 13:21
+ */
 // initial state
 import { StoreOptions } from "vuex";
 import ACCESS_ENUM from "@/access/accessEnum";
-import { UserControllerService } from "../../generated";
+import { UserControllerService } from "../../backapi";
 
 export default {
   namespaced: true,
@@ -11,8 +15,8 @@ export default {
     },
   }),
   actions: {
-    async getLoginUser({ commit, state }, payload) {
-      //从远程请求获取登录信息
+    async getLoginUser({ commit, state }) {
+      // 从远程请求获取登录信息
       const res = await UserControllerService.getLoginUserUsingGet();
       if (res.code === 0) {
         commit("updateUser", res.data);

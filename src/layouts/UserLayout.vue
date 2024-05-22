@@ -3,15 +3,20 @@
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <a-space>
-          <img src="../assets/oj-logo.svg" class="logo" />
-          <div>YU OJ</div>
+          <img src="../assets/logo.png" class="logo" />
+          <div style="margin-left: 15px; font-size: 25px; font-weight: bold">
+            YOJ 在线判题系统
+          </div>
         </a-space>
       </a-layout-header>
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">
-        <a href="#" target="_blank"> yuoj by Y </a>
+      <a-layout-footer class="footer"
+        ><a href="https://github.com/kongyuhie" target="_blank"> YOJ</a>
+        <!--        <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">-->
+        <!--          备案号-->
+        <!--        </a>-->
       </a-layout-footer>
     </a-layout>
   </div>
@@ -21,7 +26,7 @@
 #userLayout {
   text-align: center;
   background: url("https://gw.alipayobjects.com/zos/rmsportal/FfdJeJRQWjEeGTpqgBKj.png")
-    0% 0% / 100% 100%;
+    0% 0% /100% 100%;
 }
 
 #userLayout .logo {
